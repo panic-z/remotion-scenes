@@ -1,0 +1,11 @@
+{
+  "name": "remotion-scenes",
+  "version": "0.1.0",
+  "description": "Turn a video script into a working Remotion project: script → scenes prompt → scaffolded project with animations.",
+  "author": {
+    "name": "remotion-scenes contributors"
+  },
+  "homepage": "",
+  "license": "MIT",
+  "keywords": ["remotion", "video", "animation", "scenes"]
+}
