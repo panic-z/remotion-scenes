@@ -25,7 +25,7 @@ The two skills communicate via the **scenes-prompt format**, which is human-read
 
 ## What this skill does NOT do
 
-- It does **not** auto-dispatch the sub-skills. The user (or the orchestrating Claude) invokes them explicitly.
+- It does **not** auto-dispatch the sub-skills. The user (or the orchestrating Codex) invokes them explicitly.
 - It does **not** integrate voiceover, subtitles, or Tailwind.
 
 ## References

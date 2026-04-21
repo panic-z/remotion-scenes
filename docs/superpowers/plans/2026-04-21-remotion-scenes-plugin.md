@@ -2,13 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Claude Code plugin `remotion-scenes` containing one parent index skill and two sub-skills (`script-to-prompt`, `prompt-to-project`) that turn a video script into a working Remotion project.
+**Goal:** Build a Codex plugin `remotion-scenes` containing one parent index skill and two sub-skills (`script-to-prompt`, `prompt-to-project`) that turn a video script into a working Remotion project.
 
-**Architecture:** Plugin directory with `.claude-plugin/plugin.json` manifest and three skills under `skills/`. The parent skill is documentation-only; sub-skills are discoverable and invokable independently. The two sub-skills communicate via a Markdown "scenes prompt" file format that is both human-editable and LLM-parseable. Sub-skill 2 delegates Remotion domain knowledge to the existing `remotion-best-practices` skill by referencing its rules.
+**Architecture:** Plugin directory with `.codex-plugin/plugin.json` manifest and three skills under `skills/`. The parent skill is documentation-only; sub-skills are discoverable and invokable independently. The two sub-skills communicate via a Markdown "scenes prompt" file format that is both human-editable and LLM-parseable. Sub-skill 2 delegates Remotion domain knowledge to the existing `remotion-best-practices` skill by referencing its rules.
 
-**Tech Stack:** Claude Code plugin manifest (JSON), skills (Markdown with YAML frontmatter), target runtime is Remotion (create-video@latest, blank template, no Tailwind).
+**Tech Stack:** Codex plugin manifest (JSON), skills (Markdown with YAML frontmatter), target runtime is Remotion (create-video@latest, blank template, no Tailwind).
 
-**Testing note:** This plan produces primarily Markdown/JSON artifacts (skills, docs, manifest). There is no unit test harness in the plugin. Verification is done by (a) loading the plugin in a fresh Claude Code session, (b) running the end-to-end example, (c) asserting files exist with correct frontmatter. These verification steps are explicit tasks.
+**Testing note:** This plan produces primarily Markdown/JSON artifacts (skills, docs, manifest). There is no unit test harness in the plugin. Verification is done by (a) loading the plugin in a fresh Codex session, (b) running the end-to-end example, (c) asserting files exist with correct frontmatter. These verification steps are explicit tasks.
 
 **Repo root for this plan:** `/Users/wubaiyu/DEV/side-projects/remotion-scenes/`
 
@@ -18,7 +18,7 @@
 
 Files this plan creates (all paths relative to repo root):
 
-- `.claude-plugin/plugin.json` — plugin manifest (name, version, description, author)
+- `.codex-plugin/plugin.json` — plugin manifest (name, version, description, author)
 - `skills/remotion-scenes/SKILL.md` — parent index skill
 - `skills/script-to-prompt/SKILL.md` — sub-skill 1: script → scenes prompt
 - `skills/script-to-prompt/templates/scenes-prompt-template.md` — blank template referenced by sub-skill 1
@@ -82,9 +82,9 @@ Expected: commit created.
 ## Task 2: Plugin manifest
 
 **Files:**
-- Create: `.claude-plugin/plugin.json`
+- Create: `.codex-plugin/plugin.json`
 
-- [ ] **Step 1: Write `.claude-plugin/plugin.json`**
+- [ ] **Step 1: Write `.codex-plugin/plugin.json`**
 
 Exact content:
 ```json
@@ -103,13 +103,13 @@ Exact content:
 
 - [ ] **Step 2: Verify JSON parses**
 
-Run: `node -e "console.log(JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')).name)"`
+Run: `node -e "console.log(JSON.parse(require('fs').readFileSync('.codex-plugin/plugin.json','utf8')).name)"`
 Expected: `remotion-scenes`
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add .claude-plugin/plugin.json
+git add .codex-plugin/plugin.json
 git commit -m "feat: add plugin manifest"
 ```
 
@@ -151,7 +151,7 @@ The two skills communicate via the **scenes-prompt format**, which is human-read
 
 ## What this skill does NOT do
 
-- It does **not** auto-dispatch the sub-skills. The user (or the orchestrating Claude) invokes them explicitly.
+- It does **not** auto-dispatch the sub-skills. The user (or the orchestrating Codex) invokes them explicitly.
 - It does **not** integrate voiceover, subtitles, or Tailwind.
 
 ## References
@@ -550,6 +550,7 @@ Read the prompt file (or use the pasted content). Extract:
   - `### Assets` bullets (`- none` ⇒ empty; `- image: <path-or-url>` ⇒ asset). Treat any other asset type as unsupported.
 
 **Validation — fail fast with a clear message if:**
+- Header is missing the `# Video: <title>` line.
 - Header is missing any of Dimensions/FPS/Background.
 - A scene is missing `Duration` or frame math is inconsistent.
 - Any Animation bullet is missing the `element:` prefix.
@@ -862,7 +863,7 @@ Exact content:
 ````markdown
 # remotion-scenes
 
-A Claude Code plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
+A Codex plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
 
 ```
 script (text or .md)
@@ -894,24 +895,19 @@ If you prefer SSH:
 ### B. Manual
 
 ```bash
-git clone https://github.com/panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
+mkdir -p ~/plugins
+git clone https://github.com/panic-z/remotion-scenes.git ~/plugins/remotion-scenes
 ```
 
 SSH alternative:
 ```bash
-git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
+mkdir -p ~/plugins
+git clone git@github.com:panic-z/remotion-scenes.git ~/plugins/remotion-scenes
 ```
 
-Then enable the plugin in `~/.claude/settings.json`:
-```json
-{
-  "plugins": {
-    "remotion-scenes": { "enabled": true }
-  }
-}
-```
+Then register the plugin in `~/.agents/plugins/marketplace.json`.
 
-Restart Claude Code. Verify: in a new session, ask "list available skills" and confirm `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` appear.
+Restart Codex. Verify in a new session that `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` appear in the available skills/plugins list.
 
 ## Prerequisites
 
@@ -922,7 +918,7 @@ Restart Claude Code. Verify: in a new session, ask "list available skills" and c
 ## Quick start
 
 1. Put a script in `my-script.md` (or paste it directly).
-2. In Claude Code:
+2. In Codex:
    > "Use script-to-prompt to turn my-script.md into a scenes prompt."
 
    Review the resulting `scenes-prompt.md`. Edit freely.
@@ -966,7 +962,7 @@ Background: #0a0a0a
 ## Scene 1: <name>
 Duration: 3s (90 frames)
 Transition-in: none
-Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
+Transition-out: fade | slide-left | slide-right | slide-up | slide-down
 
 ### Visuals
 <description of what appears on screen>
@@ -978,6 +974,11 @@ Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
 - none
 - image: ./assets/foo.png
 - image: https://example.com/foo.png
+
+## Scene 2: <name>
+Duration: 3s (90 frames)
+Transition-in: fade | slide-left | slide-right | slide-up | slide-down
+Transition-out: none
 ```
 
 Key rules:
@@ -1072,7 +1073,7 @@ git commit -m "docs: add MIT license"
 Run:
 ```bash
 cd /Users/wubaiyu/DEV/side-projects/remotion-scenes && \
-  ls .claude-plugin/plugin.json \
+  ls .codex-plugin/plugin.json \
      skills/remotion-scenes/SKILL.md \
      skills/script-to-prompt/SKILL.md \
      skills/script-to-prompt/templates/scenes-prompt-template.md \
@@ -1098,7 +1099,7 @@ Expected: each file starts with `---`, has a `name:` matching its parent dir (`r
 
 - [ ] **Step 3: Validate plugin.json**
 
-Run: `node -e "const p=require('./.claude-plugin/plugin.json'); console.log(p.name, p.version); if(p.name!=='remotion-scenes'||!p.version) process.exit(1)"`
+Run: `node -e "const p=require('./.codex-plugin/plugin.json'); console.log(p.name, p.version); if(p.name!=='remotion-scenes'||!p.version) process.exit(1)"`
 Expected: prints `remotion-scenes 0.1.0`, exit 0.
 
 - [ ] **Step 4: Example consistency check**
@@ -1122,7 +1123,7 @@ No commit for this task (verification only).
 
 **Files:** none — this task produces a throwaway project for validation.
 
-Goal: verify the two skills actually produce a working Remotion project when followed by Claude.
+Goal: verify the two skills actually produce a working Remotion project when followed by Codex.
 
 - [ ] **Step 1: In a separate scratch directory, simulate running `prompt-to-project`**
 
@@ -1176,5 +1177,5 @@ If any step fails, DO NOT mark complete — surface the error to the user, updat
 
 - All 13 tasks complete.
 - `git log --oneline` shows a clean history of feature commits.
-- A fresh Claude Code session with this plugin installed can (a) list all three skills and (b) run the example end-to-end.
+- A fresh Codex session with this plugin installed can (a) list all three skills and (b) run the example end-to-end.
 - README quick-start instructions work verbatim on a fresh machine.

@@ -2,7 +2,7 @@
 
 [English README](./README.md)
 
-一个 Claude Code 插件，用两步把视频脚本转换成可运行的 [Remotion](https://remotion.dev) 项目。
+一个 Codex 插件，用两步把视频脚本转换成可运行的 [Remotion](https://remotion.dev) 项目。
 
 ```
 script（文本或 .md）
@@ -19,39 +19,49 @@ npx remotion studio
 
 ## 安装
 
-### A. 通过插件市场安装（推荐）
+### 推荐：本地 Codex 插件安装
+
+先把插件克隆到本地 Codex 插件目录：
 
 ```bash
-/plugin marketplace add https://github.com/panic-z/remotion-scenes.git
-/plugin install remotion-scenes
+mkdir -p ~/plugins
+git clone https://github.com/panic-z/remotion-scenes.git ~/plugins/remotion-scenes
 ```
 
 如果你已经配置了 SSH，也可以用：
 ```bash
-/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
+mkdir -p ~/plugins
+git clone git@github.com:panic-z/remotion-scenes.git ~/plugins/remotion-scenes
 ```
 
-### B. 手动安装
+然后在 `~/.agents/plugins/marketplace.json` 中注册它：
 
-```bash
-git clone https://github.com/panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
-```
-
-SSH 版本：
-```bash
-git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
-```
-
-然后在 `~/.claude/settings.json` 中启用插件：
 ```json
 {
-  "plugins": {
-    "remotion-scenes": { "enabled": true }
-  }
+  "name": "local-marketplace",
+  "interface": {
+    "displayName": "Local plugins"
+  },
+  "plugins": [
+    {
+      "name": "remotion-scenes",
+      "source": {
+        "source": "local",
+        "path": "./plugins/remotion-scenes"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    }
+  ]
 }
 ```
 
-重启 Claude Code。验证方式：在新会话里让它列出可用技能，确认 `remotion-scenes`、`script-to-prompt` 和 `prompt-to-project` 都出现。
+如果 `~/.agents/plugins/marketplace.json` 已经存在，不要覆盖整个文件，只需要把 `remotion-scenes` 这一项追加到 `plugins` 数组中。
+
+Codex 会通过 `~/plugins/remotion-scenes/.codex-plugin/plugin.json` 识别这个插件。验证方式：开启一个新的 Codex 会话，确认 `remotion-scenes`、`script-to-prompt` 和 `prompt-to-project` 出现在可用技能/插件列表中。
 
 ## 前置条件
 
@@ -61,8 +71,8 @@ git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-
 
 ## 快速开始
 
-1. 把脚本写到 `my-script.md` 中，或者直接粘贴给 Claude Code。
-2. 在 Claude Code 中输入：
+1. 把脚本写到 `my-script.md` 中，或者直接粘贴给 Codex。
+2. 在 Codex 中输入：
    > "Use script-to-prompt to turn my-script.md into a scenes prompt."
 
    检查生成的 `scenes-prompt.md`，并按需编辑。
@@ -106,7 +116,7 @@ Background: #0a0a0a
 ## Scene 1: <name>
 Duration: 3s (90 frames)
 Transition-in: none
-Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
+Transition-out: fade | slide-left | slide-right | slide-up | slide-down
 
 ### Visuals
 <description of what appears on screen>
@@ -118,6 +128,11 @@ Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
 - none
 - image: ./assets/foo.png
 - image: https://example.com/foo.png
+
+## Scene 2: <name>
+Duration: 3s (90 frames)
+Transition-in: fade | slide-left | slide-right | slide-up | slide-down
+Transition-out: none
 ```
 
 关键规则：

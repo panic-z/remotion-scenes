@@ -5,7 +5,7 @@
 
 ## Purpose
 
-A Claude Code plugin that turns a video script into a working Remotion project in two steps:
+A Codex plugin that turns a video script into a working Remotion project in two steps:
 
 1. **script-to-prompt** — transform a script (narrative or storyboard) into a structured "Remotion scenes prompt" in Markdown.
 2. **prompt-to-project** — consume that prompt to scaffold a Remotion project from scratch and implement the animations.
@@ -21,15 +21,15 @@ The two sub-skills are intentionally decoupled so that the Markdown "scenes prom
 
 ## Distribution
 
-- Packaged as a Claude Code Plugin.
-- Installed via `/plugin marketplace add https://github.com/panic-z/remotion-scenes.git` + `/plugin install remotion-scenes`, or manual clone into `~/.claude/plugins/`.
+- Packaged as a Codex plugin.
+- Installed by cloning into `~/plugins/remotion-scenes`, then registering the plugin in `~/.agents/plugins/marketplace.json`.
 - Parent skill is **index-only** — it documents the two sub-skills and the typical workflow; it does **not** auto-dispatch.
 
 ## Repository Layout
 
 ```
 remotion-scenes-plugin/
-├── .claude-plugin/
+├── .codex-plugin/
 │   └── plugin.json
 ├── skills/
 │   ├── remotion-scenes/          # parent skill (index)
@@ -61,8 +61,8 @@ Background: #0a0a0a
 
 ## Scene 1: <scene-name>
 Duration: 3s (90 frames)
-Transition-in: fade | slide-left | none
-Transition-out: fade | slide-right | none
+Transition-in: none
+Transition-out: fade | slide-left | slide-right | slide-up | slide-down
 
 ### Visuals
 <Description of elements on screen and layout>
@@ -75,7 +75,10 @@ Transition-out: fade | slide-right | none
 - image: ./assets/logo.png          # user-provided
 - image: https://example.com/x.png  # remote
 
-## Scene 2: ...
+## Scene 2: <scene-name>
+Duration: 3s (90 frames)
+Transition-in: fade | slide-left | slide-right | slide-up | slide-down
+Transition-out: none
 ```
 
 **Rules:**
@@ -150,7 +153,7 @@ Transition-out: fade | slide-right | none
 **Constraints:**
 - No Tailwind (matches scaffold flag).
 - No voiceover, no subtitles.
-- Sub-skill's `SKILL.md` must reference `remotion-best-practices` rules so Claude loads domain knowledge on demand.
+- Sub-skill's `SKILL.md` must reference `remotion-best-practices` rules so Codex loads domain knowledge on demand.
 
 ## Parent Skill: `remotion-scenes`
 
@@ -170,7 +173,7 @@ Index-only skill. `SKILL.md` contents:
 1. Intro — one-liner.
 2. Install:
    - **A (recommended):** `/plugin marketplace add https://github.com/panic-z/remotion-scenes.git` → `/plugin install remotion-scenes`.
-   - **B (manual):** clone into `~/.claude/plugins/` and enable in `~/.claude/settings.json`.
+   - **B (manual):** clone into `~/plugins/remotion-scenes` and register it in `~/.agents/plugins/marketplace.json`.
 3. Prerequisites — Node.js ≥ 18, npm or pnpm.
 4. Quick start — 3-step walkthrough with an example script.
 5. Sub-skills reference — trigger, inputs, outputs, parameters.

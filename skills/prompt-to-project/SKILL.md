@@ -44,6 +44,7 @@ Read the prompt file (or use the pasted content). Extract:
   - `### Assets` bullets (`- none` ⇒ empty; `- image: <path-or-url>` ⇒ asset). Treat any other asset type as unsupported.
 
 **Validation — fail fast with a clear message if:**
+- Header is missing the `# Video: <title>` line.
 - Header is missing any of Dimensions/FPS/Background.
 - A scene is missing `Duration` or frame math is inconsistent.
 - Any Animation bullet is missing the `element:` prefix.

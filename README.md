@@ -2,7 +2,7 @@
 
 [简体中文说明](./README.zh-CN.md)
 
-A Claude Code plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
+A Codex plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
 
 ```
 script (text or .md)
@@ -19,39 +19,49 @@ npx remotion studio
 
 ## Install
 
-### A. Plugin marketplace (recommended)
+### Recommended: Local Codex plugin install
+
+Clone the plugin into your local Codex plugins directory:
 
 ```bash
-/plugin marketplace add https://github.com/panic-z/remotion-scenes.git
-/plugin install remotion-scenes
-```
-
-If you prefer SSH:
-```bash
-/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
-```
-
-### B. Manual
-
-```bash
-git clone https://github.com/panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
+mkdir -p ~/plugins
+git clone https://github.com/panic-z/remotion-scenes.git ~/plugins/remotion-scenes
 ```
 
 SSH alternative:
 ```bash
-git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
+mkdir -p ~/plugins
+git clone git@github.com:panic-z/remotion-scenes.git ~/plugins/remotion-scenes
 ```
 
-Then enable the plugin in `~/.claude/settings.json`:
+Then register it in `~/.agents/plugins/marketplace.json`:
+
 ```json
 {
-  "plugins": {
-    "remotion-scenes": { "enabled": true }
-  }
+  "name": "local-marketplace",
+  "interface": {
+    "displayName": "Local plugins"
+  },
+  "plugins": [
+    {
+      "name": "remotion-scenes",
+      "source": {
+        "source": "local",
+        "path": "./plugins/remotion-scenes"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    }
+  ]
 }
 ```
 
-Restart Claude Code. Verify: in a new session, ask "list available skills" and confirm `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` appear.
+If `~/.agents/plugins/marketplace.json` already exists, append the `remotion-scenes` entry to its `plugins` array instead of replacing the file.
+
+Codex detects the plugin from `~/plugins/remotion-scenes/.codex-plugin/plugin.json`. Verify in a new Codex session that `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` appear in the available skills/plugins list.
 
 ## Prerequisites
 
@@ -62,7 +72,7 @@ Restart Claude Code. Verify: in a new session, ask "list available skills" and c
 ## Quick start
 
 1. Put a script in `my-script.md` (or paste it directly).
-2. In Claude Code:
+2. In Codex:
    > "Use script-to-prompt to turn my-script.md into a scenes prompt."
 
    Review the resulting `scenes-prompt.md`. Edit freely.
@@ -106,7 +116,7 @@ Background: #0a0a0a
 ## Scene 1: <name>
 Duration: 3s (90 frames)
 Transition-in: none
-Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
+Transition-out: fade | slide-left | slide-right | slide-up | slide-down
 
 ### Visuals
 <description of what appears on screen>
@@ -118,6 +128,11 @@ Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
 - none
 - image: ./assets/foo.png
 - image: https://example.com/foo.png
+
+## Scene 2: <name>
+Duration: 3s (90 frames)
+Transition-in: fade | slide-left | slide-right | slide-up | slide-down
+Transition-out: none
 ```
 
 Key rules:
