@@ -21,8 +21,8 @@ npx remotion studio
 
 这个仓库只需要克隆一次，然后按你使用的工具进行注册即可。仓库同时提供两个 manifest：
 
-- Codex：`.codex-plugin/plugin.json`
-- Codex marketplace：`.codex-plugin/marketplace.json`
+- Codex 插件：`plugins/remotion-scenes/.codex-plugin/plugin.json`
+- Codex marketplace：`.agents/plugins/marketplace.json`
 - Claude Code：`.claude-plugin/plugin.json`
 - Claude Code marketplace：`.claude-plugin/marketplace.json`
 
@@ -34,19 +34,40 @@ npx remotion studio
 codex plugin marketplace add .
 ```
 
-如果你当前不在仓库根目录，也可以直接传 checkout 的绝对路径：
+如果你当前不在仓库根目录，也可以直接传你本机 checkout 的绝对路径：
 
 ```bash
-codex plugin marketplace add /path/to/remotion-scenes
+codex plugin marketplace add /absolute/path/to/remotion-scenes
 ```
 
-等包含 `.codex-plugin/marketplace.json` 的版本发布到 GitHub 后，下面这个 shorthand 也应该能工作：
+等包含 `.agents/plugins/marketplace.json` 的版本发布到 GitHub 后，下面这个 shorthand 也应该能工作：
 
 ```bash
 codex plugin marketplace add panic-z/remotion-scenes
 ```
 
 Codex 会把这个仓库注册成 marketplace。开启一个新的会话后，`remotion-scenes`、`script-to-prompt` 和 `prompt-to-project` 就会可用。
+
+如果你的 Codex 版本只注册了 marketplace，但没有真正加载这些 skills，可以直接安装到 `~/.codex/skills`：
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo panic-z/remotion-scenes \
+  --path skills/remotion-scenes skills/script-to-prompt skills/prompt-to-project
+```
+
+然后重新开启一个 Codex 会话，并用下面的命令验证：
+
+```bash
+codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
+  "List the exact available skill names matching remotion-scenes, script-to-prompt, and prompt-to-project if they are loaded in this fresh session. If none are loaded, say none."
+```
+
+预期输出应包含：
+
+- `remotion-scenes`
+- `script-to-prompt`
+- `prompt-to-project`
 
 ### Claude Code
 

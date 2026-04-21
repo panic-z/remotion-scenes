@@ -1,0 +1,39 @@
+{
+  "name": "remotion-scenes",
+  "version": "0.1.0",
+  "description": "Turn a video script into a working Remotion project: script -> scenes prompt -> scaffolded project with animations.",
+  "author": {
+    "name": "remotion-scenes contributors",
+    "url": "https://github.com/panic-z/remotion-scenes"
+  },
+  "homepage": "https://github.com/panic-z/remotion-scenes",
+  "repository": "https://github.com/panic-z/remotion-scenes",
+  "license": "MIT",
+  "keywords": [
+    "remotion",
+    "video",
+    "animation",
+    "scenes"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Remotion Scenes",
+    "shortDescription": "Turn scripts into Remotion scene prompts and projects",
+    "longDescription": "Generate a structured scenes prompt from a video script, then scaffold a Remotion project from that prompt using a two-step Codex workflow.",
+    "developerName": "remotion-scenes contributors",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/panic-z/remotion-scenes",
+    "privacyPolicyURL": "https://github.com/panic-z/remotion-scenes",
+    "termsOfServiceURL": "https://github.com/panic-z/remotion-scenes",
+    "defaultPrompt": [
+      "Use script-to-prompt to turn my script into a scenes prompt",
+      "Use prompt-to-project with this scenes prompt",
+      "Show me the remotion-scenes workflow"
+    ],
+    "screenshots": []
+  }
+}

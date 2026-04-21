@@ -21,8 +21,8 @@ npx remotion studio
 
 Clone the repo once, then register it with the tool you use. This repo ships both manifests:
 
-- Codex: `.codex-plugin/plugin.json`
-- Codex marketplace: `.codex-plugin/marketplace.json`
+- Codex plugin: `plugins/remotion-scenes/.codex-plugin/plugin.json`
+- Codex marketplace: `.agents/plugins/marketplace.json`
 - Claude Code: `.claude-plugin/plugin.json`
 - Claude Code marketplace: `.claude-plugin/marketplace.json`
 
@@ -34,19 +34,40 @@ Fastest verified install from the repo root:
 codex plugin marketplace add .
 ```
 
-If you are not in the repo root, use the absolute checkout path instead:
+If you are not in the repo root, use your absolute checkout path instead:
 
 ```bash
-codex plugin marketplace add /path/to/remotion-scenes
+codex plugin marketplace add /absolute/path/to/remotion-scenes
 ```
 
-After a version containing `.codex-plugin/marketplace.json` is published to GitHub, the shorthand below should work as well:
+After a version containing `.agents/plugins/marketplace.json` is published to GitHub, the shorthand below should work as well:
 
 ```bash
 codex plugin marketplace add panic-z/remotion-scenes
 ```
 
 Codex stores the repo as a marketplace and makes `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` available in a new session.
+
+If your Codex build registers the marketplace but does not actually load the skills, install them directly:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo panic-z/remotion-scenes \
+  --path skills/remotion-scenes skills/script-to-prompt skills/prompt-to-project
+```
+
+Then start a new Codex session and verify:
+
+```bash
+codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
+  "List the exact available skill names matching remotion-scenes, script-to-prompt, and prompt-to-project if they are loaded in this fresh session. If none are loaded, say none."
+```
+
+Expected output includes:
+
+- `remotion-scenes`
+- `script-to-prompt`
+- `prompt-to-project`
 
 ### Claude Code
 

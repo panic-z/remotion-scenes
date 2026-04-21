@@ -7,9 +7,8 @@
     {
       "name": "remotion-scenes",
       "source": {
-        "source": "github",
-        "repo": "panic-z/remotion-scenes",
-        "path": "."
+        "source": "local",
+        "path": "./plugins/remotion-scenes"
       },
       "policy": {
         "installation": "INSTALLED_BY_DEFAULT",

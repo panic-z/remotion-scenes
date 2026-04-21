@@ -83,11 +83,24 @@ test("Codex marketplace manifest exists for remote marketplace installation", ()
   assert.equal(marketplace.plugins[0]?.name, "remotion-scenes");
 });
 
+test("repo exposes the canonical Codex marketplace layout", () => {
+  const marketplace = JSON.parse(read(".agents/plugins/marketplace.json"));
+  const plugin = JSON.parse(read("plugins/remotion-scenes/.codex-plugin/plugin.json"));
+
+  assert.equal(marketplace.name, "remotion-scenes");
+  assert.equal(marketplace.interface?.displayName, "Remotion Scenes Plugins");
+  assert.equal(marketplace.plugins[0]?.name, plugin.name);
+  assert.equal(marketplace.plugins[0]?.source?.source, "local");
+  assert.equal(marketplace.plugins[0]?.source?.path, "./plugins/remotion-scenes");
+  assert.equal(marketplace.plugins[0]?.policy?.installation, "INSTALLED_BY_DEFAULT");
+  assert.equal(plugin.skills, "./skills/");
+});
+
 test("README documents Claude Code slash-command installation", () => {
   const readme = read("README.md");
 
   assert.match(readme, /codex plugin marketplace add \./);
-  assert.match(readme, /codex plugin marketplace add \/path\/to\/remotion-scenes/);
+  assert.match(readme, /codex plugin marketplace add \/absolute\/path\/to\/remotion-scenes/);
   assert.match(readme, /\/plugin marketplace add panic-z\/remotion-scenes/);
   assert.match(readme, /\/plugin install remotion-scenes@remotion-scenes/);
 });
@@ -96,7 +109,7 @@ test("Chinese README documents Claude Code slash-command installation", () => {
   const readme = read("README.zh-CN.md");
 
   assert.match(readme, /codex plugin marketplace add \./);
-  assert.match(readme, /codex plugin marketplace add \/path\/to\/remotion-scenes/);
+  assert.match(readme, /codex plugin marketplace add \/absolute\/path\/to\/remotion-scenes/);
   assert.match(readme, /\/plugin marketplace add panic-z\/remotion-scenes/);
   assert.match(readme, /\/plugin install remotion-scenes@remotion-scenes/);
 });
@@ -130,6 +143,8 @@ test("Codex marketplace entry stays aligned with the plugin manifest", () => {
 
   assert.equal(marketplace.name, plugin.name);
   assert.equal(entry.name, plugin.name);
+  assert.equal(entry.policy?.installation, "INSTALLED_BY_DEFAULT");
+  assert.equal(entry.policy?.authentication, "ON_INSTALL");
 });
 
 test("Claude marketplace entry stays aligned with the plugin manifest", () => {
@@ -139,9 +154,13 @@ test("Claude marketplace entry stays aligned with the plugin manifest", () => {
 
   assert.equal(marketplace.name, plugin.name);
   assert.equal(marketplace.owner?.name, "remotion-scenes contributors");
-  assert.match(marketplace.metadata?.description ?? "", /Remotion/i);
+  assert.match(marketplace.description ?? "", /Remotion/i);
   assert.equal(entry.name, plugin.name);
-  assert.equal(entry.source, "./");
+  assert.equal(entry.source?.source, "url");
+  assert.equal(entry.source?.url, "https://github.com/panic-z/remotion-scenes.git");
+  assert.match(entry.description ?? "", /Remotion/i);
+  assert.equal(entry.category, "development");
+  assert.equal(entry.homepage, plugin.homepage);
 });
 
 test("internal design docs no longer advertise stale install or preview flows", () => {

@@ -1,15 +1,20 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "remotion-scenes",
+  "description": "Turn a video script into a working Remotion project: script -> scenes prompt -> scaffolded project with animations.",
   "owner": {
     "name": "remotion-scenes contributors"
-  },
-  "metadata": {
-    "description": "Remotion video workflow plugins for turning scripts into scene prompts and scaffolded projects."
   },
   "plugins": [
     {
       "name": "remotion-scenes",
-      "source": "./"
+      "description": "Two-step workflow for producing Remotion video projects from a script: convert a video script into a scenes-prompt Markdown file, then scaffold a full Remotion project from that prompt.",
+      "category": "development",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/panic-z/remotion-scenes.git"
+      },
+      "homepage": "https://github.com/panic-z/remotion-scenes"
     }
   ]
 }
