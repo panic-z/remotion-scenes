@@ -21,15 +21,15 @@ npx remotion studio
 
 ### A. 通过插件市场安装（推荐）
 
-```
-/plugin marketplace add <git-url-of-this-repo>
+```bash
+/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
 /plugin install remotion-scenes
 ```
 
 ### B. 手动安装
 
 ```bash
-git clone <git-url> ~/.claude/plugins/remotion-scenes
+git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
 ```
 
 然后在 `~/.claude/settings.json` 中启用插件：

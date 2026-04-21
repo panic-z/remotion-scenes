@@ -21,15 +21,15 @@ npx remotion studio
 
 ### A. Plugin marketplace (recommended)
 
-```
-/plugin marketplace add <git-url-of-this-repo>
+```bash
+/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
 /plugin install remotion-scenes
 ```
 
 ### B. Manual
 
 ```bash
-git clone <git-url> ~/.claude/plugins/remotion-scenes
+git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
 ```
 
 Then enable the plugin in `~/.claude/settings.json`:
