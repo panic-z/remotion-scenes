@@ -15,14 +15,14 @@ Convert a video script into a structured Markdown scenes prompt that the `prompt
 ## Inputs
 
 1. **Script content** — required. Either pasted in chat, or a file path.
-2. **Optional parameters** — ask ONLY if the user hasn't already specified:
+2. **Optional parameters** — use defaults unless the user has already specified overrides, or the task clearly requires clarification:
    - Total duration (default: estimate 30–60s based on script length; ~1s per 3–4 spoken words).
    - Dimensions (default: `1920x1080`).
    - FPS (default: `30`).
    - Visual style (default: "modern minimal"). Examples: minimal, tech, playful, corporate.
    - Output path (default: `./scenes-prompt.md`).
 
-Ask all missing parameters together in one message, not serially.
+If you do need to ask about overrides, ask all of them together in one message, not serially.
 
 ## Process
 
@@ -42,6 +42,8 @@ For each scene, decide:
 - Key elements on screen (title text, bullets, image, icon, chart).
 - 2–4 animations per scene: use verbs from this vocabulary: `fade-in`, `fade-out`, `slide-in from {left|right|top|bottom}`, `slide-out to ...`, `scale X→Y via spring`, `typewriter`, `stagger-in`.
 - Transitions between scenes: default `fade` both sides for adjacent scenes, `none` for scene 1's `Transition-in` and last scene's `Transition-out`.
+- If the user supplied a total duration, allocate scene durations so the sum matches that target as closely as possible after frame rounding.
+- Use the chosen visual style to shape `### Visuals` descriptions consistently across scenes (layout, palette, typography, and motion tone).
 
 Total frames must equal the sum of scene frames. Verify arithmetic.
 
@@ -51,9 +53,9 @@ Use the template at `templates/scenes-prompt-template.md` as the structural skel
 
 - Header block: `# Video: <title>`, `Dimensions:`, `FPS:`, `Background:` on separate lines.
 - Every scene MUST include: `## Scene N: <name>`, `Duration: Ns (Nf frames)`, `Transition-in:`, `Transition-out:`, and the three subsections `### Visuals`, `### Animations`, `### Assets`.
-- Animation bullets MUST include an explicit frame range (`0-15f`) — scene-local frames, NOT global.
+- Animation bullets MUST use `element: action, action` format, and every animation clause MUST include an explicit frame range (`0-15f`) — scene-local frames, NOT global.
 - If no asset is needed: write `- none` (literal) under Assets.
-- Local assets MUST be prefixed with `./` (e.g. `./assets/logo.png`) so the downstream skill can detect user-provided files.
+- Local assets MUST be prefixed with `./assets/` (e.g. `./assets/logo.png`) so the downstream skill can map them into `public/assets/` without ambiguity.
 
 ### Step 4: Write output
 
@@ -64,7 +66,7 @@ Use the template at `templates/scenes-prompt-template.md` as the structural skel
 
 Print:
 - Scene count and total duration (seconds + frames).
-- A checklist of any user-provided assets (local `./` paths). If none: say "No user assets required."
+- A checklist of any user-provided assets (local `./assets/...` paths). If none: say "No user assets required."
 - Next step: "Invoke `prompt-to-project` with this file to scaffold the Remotion project."
 
 ## Constraints
@@ -76,6 +78,7 @@ Print:
 ## Output checklist (verify before finishing)
 
 - [ ] All scenes have `Duration: Ns (Nf frames)` with correct frame math (frames = seconds * fps).
-- [ ] Every `### Animations` bullet has a frame range.
+- [ ] Every `### Animations` bullet starts with `element:`.
+- [ ] Every animation clause has a frame range.
 - [ ] Every `### Assets` subsection either lists assets or says `- none`.
 - [ ] Total duration announced to the user matches sum of scene durations.

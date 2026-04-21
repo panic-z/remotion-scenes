@@ -28,8 +28,8 @@ Five circular nodes labeled as short words ("idea", "note", "link", "graph", "yo
 
 ### Animations
 - nodes: stagger-in at 0-60f
-- links: fade-in at 60-120f (each link 10f apart, so stagger within this range)
-- callout text "every note is a node" fade-in at 120-150f, fade-out at 160-180f
+- links: stagger-in at 60-120f
+- callout text: fade-in at 120-150f, fade-out at 160-180f
 
 ### Assets
 - none
@@ -43,8 +43,10 @@ Transition-out: fade
 Three device silhouettes (desktop, phone, tablet) side by side with a pulsing sync arc above them. Caption "sync in seconds" below.
 
 ### Animations
-- devices: slide-in from bottom at 0-30f, stagger-in across 30f
-- sync-arc: scale 0.8→1.0 via spring at 30-60f, opacity pulse 60-120f
+- desktop device: slide-in from bottom at 0-20f
+- phone device: slide-in from bottom at 10-30f
+- tablet device: slide-in from bottom at 20-40f
+- sync-arc: fade-in at 30-60f, scale 0.8→1.0 via spring at 30-60f, fade-out at 105-120f
 - caption: fade-in at 60-90f
 
 ### Assets

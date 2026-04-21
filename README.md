@@ -22,12 +22,22 @@ npx remotion studio
 ### A. Plugin marketplace (recommended)
 
 ```bash
-/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
+/plugin marketplace add https://github.com/panic-z/remotion-scenes.git
 /plugin install remotion-scenes
+```
+
+If you prefer SSH:
+```bash
+/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
 ```
 
 ### B. Manual
 
+```bash
+git clone https://github.com/panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
+```
+
+SSH alternative:
 ```bash
 git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
 ```
@@ -72,7 +82,7 @@ See `examples/example-script.md` → `examples/example-scenes-prompt.md` for a w
 
 - **Input:** a script (narrative prose or storyboard), pasted or file path.
 - **Output:** `scenes-prompt.md` (path configurable).
-- **Parameters:** total duration, dimensions (default 1920x1080), fps (default 30), visual style (default "modern minimal").
+- **Parameters:** total duration, dimensions (default 1920x1080), fps (default 30), visual style (default "modern minimal"), output path (default `./scenes-prompt.md`).
 
 ### `prompt-to-project`
 
@@ -95,25 +105,29 @@ Background: #0a0a0a
 
 ## Scene 1: <name>
 Duration: 3s (90 frames)
-Transition-in: fade | slide-left | slide-right | slide-up | slide-down | none
+Transition-in: none
 Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
 
 ### Visuals
 <description of what appears on screen>
 
 ### Animations
-- element: fade-in at 0-15f
-- element: scale 0.9→1.0 via spring at 0-30f
+- element: fade-in at 0-15f, scale 0.9→1.0 via spring at 0-30f
 
 ### Assets
-- none | image: ./assets/foo.png | image: https://...
+- none
+- image: ./assets/foo.png
+- image: https://example.com/foo.png
 ```
 
 Key rules:
 - Frame ranges are **scene-local** (reset at the start of each scene).
 - Duration includes both seconds and frames: `Ns (Nf frames)`.
+- Animation bullets use `element: clause, clause` format, and every clause needs its own frame range.
 - Animation verbs: `fade-in`, `fade-out`, `slide-in from <dir>`, `slide-out to <dir>`, `scale X→Y via spring`, `typewriter`, `stagger-in`.
-- Local asset paths start with `./` — these are files the user must provide in `public/assets/`.
+- Adjacent scene boundaries must agree: `Scene N`'s `Transition-out` must match `Scene N+1`'s `Transition-in`.
+- Local asset paths must start with `./assets/` — these are files the user must provide under `public/assets/`, preserving any subdirectories after `./assets/`.
+- The first scene must use `Transition-in: none`, and the last scene must use `Transition-out: none`.
 
 ## FAQ
 
@@ -124,7 +138,7 @@ A: Yes. Edit the `Dimensions:` and `FPS:` lines in `scenes-prompt.md` before run
 A: Yes — this plugin intentionally leaves both out. For voiceover, see `remotion-best-practices/rules/voiceover.md`. For subtitles, see `remotion-best-practices/rules/subtitles.md`.
 
 **Q: What if an asset file is missing?**
-A: `prompt-to-project` will generate placeholder colored blocks with `// TODO: provide <path>` and print a missing-assets checklist. Drop the files into `public/assets/` and re-run the studio.
+A: `prompt-to-project` will generate placeholder colored blocks with `// TODO: provide <path>` and print a missing-assets checklist. Put the files under `public/assets/`, preserving any subdirectories after `./assets/`, and re-run the studio.
 
 **Q: Can I use Tailwind?**
 A: Not out of the box. The scaffold uses `--no-tailwind` for config simplicity. Add Tailwind manually per the Remotion docs if needed.

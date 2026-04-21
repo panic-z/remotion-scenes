@@ -27,7 +27,7 @@ If `remotion-best-practices` is not installed, proceed using this skill's `refer
 ## Inputs
 
 1. **Scenes prompt** — required. Either a file path or pasted Markdown.
-2. **Project name** — optional. If missing and CWD is non-empty, ask the user.
+2. **Project name** — optional. If missing, ask the user. Suggest a slug of the video title.
 
 ## Process
 
@@ -40,19 +40,26 @@ Read the prompt file (or use the pasted content). Extract:
   - `Duration:` — parse the frame count from `Ns (Nf frames)`.
   - `Transition-in:` / `Transition-out:` — one of `fade`, `slide-left`, `slide-right`, `slide-up`, `slide-down`, `none`.
   - `### Visuals` body (string).
-  - `### Animations` bullets (parse each into `{element, verb, direction?, range: [A, B], extras?}`).
-  - `### Assets` bullets (`- none` ⇒ empty; `- image: <path-or-url>` ⇒ asset).
+  - `### Animations` bullets (parse each as `element: clause, clause, ...`, then split into one or more animation clauses such as `{element, verb, direction?, range: [A, B], extras?}`).
+  - `### Assets` bullets (`- none` ⇒ empty; `- image: <path-or-url>` ⇒ asset). Treat any other asset type as unsupported.
 
 **Validation — fail fast with a clear message if:**
-- Header is missing any of Dimensions/FPS.
+- Header is missing any of Dimensions/FPS/Background.
 - A scene is missing `Duration` or frame math is inconsistent.
-- Any Animation bullet has no frame range.
+- Any Animation bullet is missing the `element:` prefix.
+- Any animation clause in a bullet has no frame range.
+- The prompt contains zero scenes.
+- Any asset bullet uses an unsupported type (anything other than `none` or `image:`).
+- Any local asset path does not start with `./assets/`.
+- The first scene's `Transition-in` is not `none`.
+- The last scene's `Transition-out` is not `none`.
+- Any scene boundary is inconsistent: `Scene N`'s `Transition-out` must match `Scene N+1`'s `Transition-in`. If they differ, stop and ask the user to fix the prompt.
 
 ### Step 2: Decide scaffold directory
 
-- If CWD is empty (no files other than the prompt itself and `.git`): scaffold in place.
-- Else if a project name was provided: scaffold in `./<project-name>/`.
+- If a project name was provided: scaffold in `./<project-name>/`.
 - Else: ask the user for a project name. Suggest a slug of the video title.
+- Do **not** scaffold in place by default. In-place generation is only allowed if the user explicitly requests it and confirms the directory is safe to overwrite.
 
 ### Step 3: Run the scaffold
 
@@ -61,9 +68,9 @@ Run from the chosen parent directory:
 npx create-video@latest --yes --blank --no-tailwind <name>
 ```
 
-For in-place scaffolding, run in a temp sibling directory and move files — or ask the user to confirm creating in a named subdirectory (preferred, simpler). Default behavior: always use a named subdirectory when CWD is non-empty.
+If the user explicitly asks for in-place scaffolding, run in a temp sibling directory and move files after generation. Otherwise prefer a named subdirectory because it is simpler and less error-prone.
 
-If `@remotion/transitions` is needed (any scene boundary not `none`), install it:
+If `@remotion/transitions` is needed (any validated scene boundary not `none`), install it:
 ```bash
 cd <project-dir> && npm install @remotion/transitions
 ```
@@ -142,7 +149,7 @@ Transition presentation mapping:
 
 Template per scene:
 ```tsx
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, Img } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, Img, staticFile } from "remotion";
 
 export const SceneN = () => {
   const frame = useCurrentFrame();
@@ -164,7 +171,7 @@ For each Animation bullet, translate using `references/animation-patterns.md`. C
 #### 4d. Assets
 
 - Remote URL (`https://...`): use `<Img src={url}>` directly.
-- Local `./assets/...` path: ensure `public/assets/` exists; reference via `staticFile("assets/filename.ext")` from `remotion`. If the file doesn't exist yet, render a placeholder colored `<div>` the same size, with a code comment `// TODO: provide <path>` and add the path to a "missing assets" list.
+- Local `./assets/...` path: ensure `public/assets/` exists; preserve the relative path after `./assets/` and reference it via `staticFile("assets/...")` from `remotion` (for example, `./assets/icons/logo.svg` → `public/assets/icons/logo.svg` → `staticFile("assets/icons/logo.svg")`). If the file doesn't exist yet, render a placeholder colored `<div>` the same size, with a code comment `// TODO: provide <path>` and add the path to a "missing assets" list.
 
 ### Step 5: Sanity-check render (optional, recommended)
 
@@ -179,7 +186,7 @@ Report PASS/FAIL. If it fails, surface the error to the user and stop before cla
 Print:
 1. Project directory path.
 2. List of files generated.
-3. "Missing assets" checklist (paths the user needs to place in `public/assets/`).
+3. "Missing assets" checklist (paths the user needs to place under `public/assets/`, preserving any subdirectories after `./assets/`).
 4. Next commands:
    ```
    cd <project-dir>

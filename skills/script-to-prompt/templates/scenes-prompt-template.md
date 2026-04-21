@@ -12,7 +12,7 @@ Assets prefixed with "./" are user-provided local files; URLs are remote.
 
 ## Scene 1: <SCENE_NAME>
 Duration: 3s (90 frames)
-Transition-in: fade
+Transition-in: none
 Transition-out: fade
 
 ### Visuals
@@ -23,18 +23,21 @@ Transition-out: fade
 - <element>: ...
 
 ### Assets
-- <none | image: ./assets/foo.png | image: https://...>
+- none
+- image: ./assets/foo.png
+- image: https://example.com/foo.png
+<!-- Use one or more real asset bullets above; do not keep all three. -->
 
 ## Scene 2: <SCENE_NAME>
 Duration: Xs (Nf frames)
-Transition-in: none
-Transition-out: fade
+Transition-in: fade
+Transition-out: none
 
 ### Visuals
 ...
 
 ### Animations
-- ...
+- <element>: <action> at <start>-<end>f, <action> at <start>-<end>f
 
 ### Assets
 - none

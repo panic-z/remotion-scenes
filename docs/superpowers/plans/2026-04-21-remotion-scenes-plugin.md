@@ -95,7 +95,7 @@ Exact content:
   "author": {
     "name": "remotion-scenes contributors"
   },
-  "homepage": "",
+  "homepage": "https://github.com/panic-z/remotion-scenes",
   "license": "MIT",
   "keywords": ["remotion", "video", "animation", "scenes"]
 }
@@ -198,7 +198,7 @@ Assets prefixed with "./" are user-provided local files; URLs are remote.
 
 ## Scene 1: <SCENE_NAME>
 Duration: 3s (90 frames)
-Transition-in: fade
+Transition-in: none
 Transition-out: fade
 
 ### Visuals
@@ -209,18 +209,21 @@ Transition-out: fade
 - <element>: ...
 
 ### Assets
-- <none | image: ./assets/foo.png | image: https://...>
+- none
+- image: ./assets/foo.png
+- image: https://example.com/foo.png
+<!-- Use one or more real asset bullets above; do not keep all three. -->
 
 ## Scene 2: <SCENE_NAME>
 Duration: Xs (Nf frames)
-Transition-in: none
-Transition-out: fade
+Transition-in: fade
+Transition-out: none
 
 ### Visuals
 ...
 
 ### Animations
-- ...
+- <element>: <action> at <start>-<end>f, <action> at <start>-<end>f
 
 ### Assets
 - none
@@ -261,14 +264,14 @@ Convert a video script into a structured Markdown scenes prompt that the `prompt
 ## Inputs
 
 1. **Script content** — required. Either pasted in chat, or a file path. If a path is given, read the file first.
-2. **Optional parameters** — ask ONLY if the user hasn't already specified:
+2. **Optional parameters** — use defaults unless the user has already specified overrides, or the task clearly requires clarification:
    - Total duration (default: estimate 30–60s based on script length; ~1s per 3–4 spoken words).
    - Dimensions (default: `1920x1080`).
    - FPS (default: `30`).
    - Visual style (default: "modern minimal"). Examples: minimal, tech, playful, corporate.
    - Output path (default: `./scenes-prompt.md`).
 
-Ask all missing parameters together in one message, not serially.
+If you do need to ask about overrides, ask all of them together in one message, not serially.
 
 ## Process
 
@@ -288,6 +291,8 @@ For each scene, decide:
 - Key elements on screen (title text, bullets, image, icon, chart).
 - 2–4 animations per scene: use verbs from this vocabulary: `fade-in`, `fade-out`, `slide-in from {left|right|top|bottom}`, `slide-out to ...`, `scale X→Y via spring`, `typewriter`, `stagger-in`.
 - Transitions between scenes: default `fade` both sides for adjacent scenes, `none` for scene 1's `Transition-in` and last scene's `Transition-out`.
+- If the user supplied a total duration, allocate scene durations so the sum matches that target as closely as possible after frame rounding.
+- Use the chosen visual style to shape `### Visuals` descriptions consistently across scenes (layout, palette, typography, and motion tone).
 
 Total frames must equal the sum of scene frames. Verify arithmetic.
 
@@ -297,9 +302,9 @@ Use the template at `templates/scenes-prompt-template.md` as the structural skel
 
 - Header block: `# Video: <title>`, `Dimensions:`, `FPS:`, `Background:` on separate lines.
 - Every scene MUST include: `## Scene N: <name>`, `Duration: Ns (Nf frames)`, `Transition-in:`, `Transition-out:`, and the three subsections `### Visuals`, `### Animations`, `### Assets`.
-- Animation bullets MUST include an explicit frame range (`0-15f`) — scene-local frames, NOT global.
+- Animation bullets MUST use `element: action, action` format, and every animation clause MUST include an explicit frame range (`0-15f`) — scene-local frames, NOT global.
 - If no asset is needed: write `- none` (literal) under Assets.
-- Local assets MUST be prefixed with `./` (e.g. `./assets/logo.png`) so the downstream skill can detect user-provided files.
+- Local assets MUST be prefixed with `./assets/` (e.g. `./assets/logo.png`) so the downstream skill can map them into `public/assets/` without ambiguity.
 
 ### Step 4: Write output
 
@@ -310,7 +315,7 @@ Use the template at `templates/scenes-prompt-template.md` as the structural skel
 
 Print:
 - Scene count and total duration (seconds + frames).
-- A checklist of any user-provided assets (local `./` paths). If none: say "No user assets required."
+- A checklist of any user-provided assets (local `./assets/...` paths). If none: say "No user assets required."
 - Next step: "Invoke `prompt-to-project` with this file to scaffold the Remotion project."
 
 ## Constraints
@@ -322,7 +327,8 @@ Print:
 ## Output checklist (verify before finishing)
 
 - [ ] All scenes have `Duration: Ns (Nf frames)` with correct frame math (frames = seconds * fps).
-- [ ] Every `### Animations` bullet has a frame range.
+- [ ] Every `### Animations` bullet starts with `element:`.
+- [ ] Every animation clause has a frame range.
 - [ ] Every `### Assets` subsection either lists assets or says `- none`.
 - [ ] Total duration announced to the user matches sum of scene durations.
 ````
@@ -398,7 +404,24 @@ Direction → axis/sign:
 - top: translateY from `-OFFSET` to `0`
 - bottom: translateY from `+OFFSET` to `0`
 
-Default `OFFSET = 200`. For slide-out, reverse the range.
+Default `OFFSET = 200`.
+
+## slide-out to {left|right|top|bottom} at A-Bf
+
+```tsx
+// to left → element exits moving leftward
+const x = interpolate(frame, [A, B], [0, -200], {
+  extrapolateLeft: "clamp",
+  extrapolateRight: "clamp",
+});
+return <div style={{ transform: `translateX(${x}px)` }}>...</div>;
+```
+
+Direction → axis/sign:
+- left: translateX from `0` to `-OFFSET`
+- right: translateX from `0` to `+OFFSET`
+- top: translateY from `0` to `-OFFSET`
+- bottom: translateY from `0` to `+OFFSET`
 
 ## scale X→Y via spring at A-Bf
 
@@ -510,7 +533,7 @@ If `remotion-best-practices` is not installed, proceed using this skill's `refer
 ## Inputs
 
 1. **Scenes prompt** — required. Either a file path or pasted Markdown.
-2. **Project name** — optional. If missing and CWD is non-empty, ask the user.
+2. **Project name** — optional. If missing, ask the user. Suggest a slug of the video title.
 
 ## Process
 
@@ -523,19 +546,24 @@ Read the prompt file (or use the pasted content). Extract:
   - `Duration:` — parse the frame count from `Ns (Nf frames)`.
   - `Transition-in:` / `Transition-out:` — one of `fade`, `slide-left`, `slide-right`, `slide-up`, `slide-down`, `none`.
   - `### Visuals` body (string).
-  - `### Animations` bullets (parse each into `{element, verb, direction?, range: [A, B], extras?}`).
-  - `### Assets` bullets (`- none` ⇒ empty; `- image: <path-or-url>` ⇒ asset).
+  - `### Animations` bullets (parse each as `element: clause, clause, ...`, then split into one or more animation clauses such as `{element, verb, direction?, range: [A, B], extras?}`).
+  - `### Assets` bullets (`- none` ⇒ empty; `- image: <path-or-url>` ⇒ asset). Treat any other asset type as unsupported.
 
 **Validation — fail fast with a clear message if:**
-- Header is missing any of Dimensions/FPS.
+- Header is missing any of Dimensions/FPS/Background.
 - A scene is missing `Duration` or frame math is inconsistent.
-- Any Animation bullet has no frame range.
+- Any Animation bullet is missing the `element:` prefix.
+- Any animation clause in a bullet has no frame range.
+- Any asset bullet uses an unsupported type (anything other than `none` or `image:`).
+- Any local asset path does not start with `./assets/`.
+- The first scene's `Transition-in` is not `none`.
+- The last scene's `Transition-out` is not `none`.
 
 ### Step 2: Decide scaffold directory
 
-- If CWD is empty (no files other than the prompt itself and `.git`): scaffold in place.
-- Else if a project name was provided: scaffold in `./<project-name>/`.
+- If a project name was provided: scaffold in `./<project-name>/`.
 - Else: ask the user for a project name. Suggest a slug of the video title.
+- Do **not** scaffold in place by default. In-place generation is only allowed if the user explicitly requests it and confirms the directory is safe to overwrite.
 
 ### Step 3: Run the scaffold
 
@@ -544,9 +572,9 @@ Run from the chosen parent directory:
 npx create-video@latest --yes --blank --no-tailwind <name>
 ```
 
-For in-place scaffolding, run in a temp sibling directory and move files — or ask the user to confirm creating in a named subdirectory (preferred, simpler). Default behavior: always use a named subdirectory when CWD is non-empty.
+If the user explicitly asks for in-place scaffolding, run in a temp sibling directory and move files after generation. Otherwise prefer a named subdirectory because it is simpler and less error-prone.
 
-If `@remotion/transitions` is needed (any scene boundary not `none`), install it:
+If `@remotion/transitions` is needed (any validated scene boundary not `none`), install it:
 ```bash
 cd <project-dir> && npm install @remotion/transitions
 ```
@@ -647,7 +675,7 @@ For each Animation bullet, translate using `references/animation-patterns.md`. C
 #### 4d. Assets
 
 - Remote URL (`https://...`): use `<Img src={url}>` directly.
-- Local `./assets/...` path: ensure `public/assets/` exists; reference via `staticFile("assets/filename.ext")` from `remotion`. If the file doesn't exist yet, render a placeholder colored `<div>` the same size, with a code comment `// TODO: provide <path>` and add the path to a "missing assets" list.
+- Local `./assets/...` path: ensure `public/assets/` exists; preserve the relative path after `./assets/` and reference it via `staticFile("assets/...")` from `remotion` (for example, `./assets/icons/logo.svg` → `public/assets/icons/logo.svg` → `staticFile("assets/icons/logo.svg")`). If the file doesn't exist yet, render a placeholder colored `<div>` the same size, with a code comment `// TODO: provide <path>` and add the path to a "missing assets" list.
 
 ### Step 5: Sanity-check render (optional, recommended)
 
@@ -662,7 +690,7 @@ Report PASS/FAIL. If it fails, surface the error to the user and stop before cla
 Print:
 1. Project directory path.
 2. List of files generated.
-3. "Missing assets" checklist (paths the user needs to place in `public/assets/`).
+3. "Missing assets" checklist (paths the user needs to place under `public/assets/`, preserving any subdirectories after `./assets/`).
 4. Next commands:
    ```
    cd <project-dir>
@@ -768,8 +796,8 @@ Five circular nodes labeled as short words ("idea", "note", "link", "graph", "yo
 
 ### Animations
 - nodes: stagger-in at 0-60f
-- links: fade-in at 60-120f (each link 10f apart, so stagger within this range)
-- callout text "every note is a node" fade-in at 120-150f, fade-out at 160-180f
+- links: stagger-in at 60-120f
+- callout text: fade-in at 120-150f, fade-out at 160-180f
 
 ### Assets
 - none
@@ -783,8 +811,10 @@ Transition-out: fade
 Three device silhouettes (desktop, phone, tablet) side by side with a pulsing sync arc above them. Caption "sync in seconds" below.
 
 ### Animations
-- devices: slide-in from bottom at 0-30f, stagger-in across 30f
-- sync-arc: scale 0.8→1.0 via spring at 30-60f, opacity pulse 60-120f
+- desktop device: slide-in from bottom at 0-20f
+- phone device: slide-in from bottom at 10-30f
+- tablet device: slide-in from bottom at 20-40f
+- sync-arc: fade-in at 30-60f, scale 0.8→1.0 via spring at 30-60f, fade-out at 105-120f
 - caption: fade-in at 60-90f
 
 ### Assets
@@ -851,15 +881,25 @@ npx remotion studio
 
 ### A. Plugin marketplace (recommended)
 
-```
-/plugin marketplace add <git-url-of-this-repo>
+```bash
+/plugin marketplace add https://github.com/panic-z/remotion-scenes.git
 /plugin install remotion-scenes
+```
+
+If you prefer SSH:
+```bash
+/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
 ```
 
 ### B. Manual
 
 ```bash
-git clone <git-url> ~/.claude/plugins/remotion-scenes
+git clone https://github.com/panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
+```
+
+SSH alternative:
+```bash
+git clone git@github.com:panic-z/remotion-scenes.git ~/.claude/plugins/remotion-scenes
 ```
 
 Then enable the plugin in `~/.claude/settings.json`:
@@ -902,7 +942,7 @@ See `examples/example-script.md` → `examples/example-scenes-prompt.md` for a w
 
 - **Input:** a script (narrative prose or storyboard), pasted or file path.
 - **Output:** `scenes-prompt.md` (path configurable).
-- **Parameters:** total duration, dimensions (default 1920x1080), fps (default 30), visual style (default "modern minimal").
+- **Parameters:** total duration, dimensions (default 1920x1080), fps (default 30), visual style (default "modern minimal"), output path (default `./scenes-prompt.md`).
 
 ### `prompt-to-project`
 
@@ -925,25 +965,27 @@ Background: #0a0a0a
 
 ## Scene 1: <name>
 Duration: 3s (90 frames)
-Transition-in: fade | slide-left | slide-right | slide-up | slide-down | none
+Transition-in: none
 Transition-out: fade | slide-left | slide-right | slide-up | slide-down | none
 
 ### Visuals
 <description of what appears on screen>
 
 ### Animations
-- element: fade-in at 0-15f
-- element: scale 0.9→1.0 via spring at 0-30f
+- element: fade-in at 0-15f, scale 0.9→1.0 via spring at 0-30f
 
 ### Assets
-- none | image: ./assets/foo.png | image: https://...
+- none
+- image: ./assets/foo.png
+- image: https://example.com/foo.png
 ```
 
 Key rules:
 - Frame ranges are **scene-local** (reset at the start of each scene).
 - Duration includes both seconds and frames: `Ns (Nf frames)`.
 - Animation verbs: `fade-in`, `fade-out`, `slide-in from <dir>`, `slide-out to <dir>`, `scale X→Y via spring`, `typewriter`, `stagger-in`.
-- Local asset paths start with `./` — these are files the user must provide in `public/assets/`.
+- Local asset paths must start with `./assets/` — these are files the user must provide under `public/assets/`, preserving any subdirectories after `./assets/`.
+- The first scene must use `Transition-in: none`, and the last scene must use `Transition-out: none`.
 
 ## FAQ
 
@@ -954,7 +996,7 @@ A: Yes. Edit the `Dimensions:` and `FPS:` lines in `scenes-prompt.md` before run
 A: Yes — this plugin intentionally leaves both out. For voiceover, see `remotion-best-practices/rules/voiceover.md`. For subtitles, see `remotion-best-practices/rules/subtitles.md`.
 
 **Q: What if an asset file is missing?**
-A: `prompt-to-project` will generate placeholder colored blocks with `// TODO: provide <path>` and print a missing-assets checklist. Drop the files into `public/assets/` and re-run the studio.
+A: `prompt-to-project` will generate placeholder colored blocks with `// TODO: provide <path>` and print a missing-assets checklist. Put the files under `public/assets/`, preserving any subdirectories after `./assets/`, and re-run the studio.
 
 **Q: Can I use Tailwind?**
 A: Not out of the box. The scaffold uses `--no-tailwind` for config simplicity. Add Tailwind manually per the Remotion docs if needed.
@@ -1108,7 +1150,7 @@ Expected: package added, no errors.
 
 Run:
 ```bash
-cd /tmp/remotion-scenes-dogfood/my-video && npx remotion still MyComp --frame=0 --scale=0.25 --output=out/check.png
+cd /tmp/remotion-scenes-dogfood/my-video && npx remotion still Main --frame=0 --scale=0.25 --output=out/check.png
 ```
 Expected: PNG produced. (We don't need to render our scenes here — this only verifies the scaffold command itself works on this machine.)
 

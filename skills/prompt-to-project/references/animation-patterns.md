@@ -46,7 +46,24 @@ Direction → axis/sign:
 - top: translateY from `-OFFSET` to `0`
 - bottom: translateY from `+OFFSET` to `0`
 
-Default `OFFSET = 200`. For slide-out, reverse the range.
+Default `OFFSET = 200`.
+
+## slide-out to {left|right|top|bottom} at A-Bf
+
+```tsx
+// to left → element exits moving leftward
+const x = interpolate(frame, [A, B], [0, -200], {
+  extrapolateLeft: "clamp",
+  extrapolateRight: "clamp",
+});
+return <div style={{ transform: `translateX(${x}px)` }}>...</div>;
+```
+
+Direction → axis/sign:
+- left: translateX from `0` to `-OFFSET`
+- right: translateX from `0` to `+OFFSET`
+- top: translateY from `0` to `-OFFSET`
+- bottom: translateY from `0` to `+OFFSET`
 
 ## scale X→Y via spring at A-Bf
 
