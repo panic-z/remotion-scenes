@@ -1,0 +1,15 @@
+{
+  "name": "remotion-scenes",
+  "owner": {
+    "name": "remotion-scenes contributors"
+  },
+  "metadata": {
+    "description": "Remotion video workflow plugins for turning scripts into scene prompts and scaffolded projects."
+  },
+  "plugins": [
+    {
+      "name": "remotion-scenes",
+      "source": "./"
+    }
+  ]
+}

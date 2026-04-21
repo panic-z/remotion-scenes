@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Codex plugin `remotion-scenes` containing one parent index skill and two sub-skills (`script-to-prompt`, `prompt-to-project`) that turn a video script into a working Remotion project.
+**Goal:** Build a dual-target Codex and Claude Code plugin `remotion-scenes` containing one parent index skill and two sub-skills (`script-to-prompt`, `prompt-to-project`) that turn a video script into a working Remotion project.
 
 **Architecture:** Plugin directory with `.codex-plugin/plugin.json` manifest and three skills under `skills/`. The parent skill is documentation-only; sub-skills are discoverable and invokable independently. The two sub-skills communicate via a Markdown "scenes prompt" file format that is both human-editable and LLM-parseable. Sub-skill 2 delegates Remotion domain knowledge to the existing `remotion-best-practices` skill by referencing its rules.
 
-**Tech Stack:** Codex plugin manifest (JSON), skills (Markdown with YAML frontmatter), target runtime is Remotion (create-video@latest, blank template, no Tailwind).
+**Tech Stack:** Codex plugin manifest + Claude Code plugin/marketplace manifests (JSON), skills (Markdown with YAML frontmatter), target runtime is Remotion (create-video@latest, blank template, no Tailwind).
 
 **Testing note:** This plan produces primarily Markdown/JSON artifacts (skills, docs, manifest). There is no unit test harness in the plugin. Verification is done by (a) loading the plugin in a fresh Codex session, (b) running the end-to-end example, (c) asserting files exist with correct frontmatter. These verification steps are explicit tasks.
 
@@ -147,7 +147,7 @@ The two skills communicate via the **scenes-prompt format**, which is human-read
 2. Invoke `script-to-prompt` → produces `scenes-prompt.md`.
 3. User reviews and edits `scenes-prompt.md` if needed.
 4. Invoke `prompt-to-project` → scaffolds Remotion project + writes scene components.
-5. `cd <project>` and run `npx remotion studio` to preview.
+5. `cd <project>`, install dependencies, then run `npx remotion studio` to preview.
 
 ## What this skill does NOT do
 
@@ -695,12 +695,13 @@ Print:
 4. Next commands:
    ```
    cd <project-dir>
+   npm install
    npx remotion studio
    ```
 
 ## Constraints
 
-- Never enable Tailwind — the scaffold flag `--no-tailwind` is mandatory.
+- Request `--no-tailwind` when scaffolding, but do not assume the current `create-video@latest` template is fully Tailwind-free.
 - Never add voiceover or subtitle tracks.
 - All frame ranges in the scenes prompt are scene-local; convert correctly when the Main composition uses a single global frame (it does not — each `<Sequence>` resets the frame counter inside the child component).
 - Do not modify files outside the chosen project directory.
@@ -863,7 +864,7 @@ Exact content:
 ````markdown
 # remotion-scenes
 
-A Codex plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
+A Codex plugin and Claude Code plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
 
 ```
 script (text or .md)
@@ -880,19 +881,15 @@ npx remotion studio
 
 ## Install
 
-### A. Plugin marketplace (recommended)
+### A. Claude Code marketplace
 
 ```bash
-/plugin marketplace add https://github.com/panic-z/remotion-scenes.git
-/plugin install remotion-scenes
+/plugin marketplace add panic-z/remotion-scenes
+/plugin install remotion-scenes@remotion-scenes
+/reload-plugins
 ```
 
-If you prefer SSH:
-```bash
-/plugin marketplace add git@github.com:panic-z/remotion-scenes.git
-```
-
-### B. Manual
+### B. Codex manual registration
 
 ```bash
 mkdir -p ~/plugins
@@ -918,7 +915,7 @@ Restart Codex. Verify in a new session that `remotion-scenes`, `script-to-prompt
 ## Quick start
 
 1. Put a script in `my-script.md` (or paste it directly).
-2. In Codex:
+2. In Codex or Claude Code:
    > "Use script-to-prompt to turn my-script.md into a scenes prompt."
 
    Review the resulting `scenes-prompt.md`. Edit freely.
@@ -927,6 +924,7 @@ Restart Codex. Verify in a new session that `remotion-scenes`, `script-to-prompt
 4. Preview:
    ```bash
    cd my-video
+   npm install
    npx remotion studio
    ```
 

@@ -2,7 +2,7 @@
 
 [简体中文说明](./README.zh-CN.md)
 
-A Codex plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
+A Codex plugin and Claude Code plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
 
 ```
 script (text or .md)
@@ -19,49 +19,54 @@ npx remotion studio
 
 ## Install
 
-### Recommended: Local Codex plugin install
+Clone the repo once, then register it with the tool you use. This repo ships both manifests:
 
-Clone the plugin into your local Codex plugins directory:
+- Codex: `.codex-plugin/plugin.json`
+- Codex marketplace: `.codex-plugin/marketplace.json`
+- Claude Code: `.claude-plugin/plugin.json`
+- Claude Code marketplace: `.claude-plugin/marketplace.json`
+
+### Codex
+
+Fastest verified install from the repo root:
 
 ```bash
-mkdir -p ~/plugins
-git clone https://github.com/panic-z/remotion-scenes.git ~/plugins/remotion-scenes
+codex plugin marketplace add .
 ```
 
-SSH alternative:
+If you are not in the repo root, use the absolute checkout path instead:
+
 ```bash
-mkdir -p ~/plugins
-git clone git@github.com:panic-z/remotion-scenes.git ~/plugins/remotion-scenes
+codex plugin marketplace add /path/to/remotion-scenes
 ```
 
-Then register it in `~/.agents/plugins/marketplace.json`:
+After a version containing `.codex-plugin/marketplace.json` is published to GitHub, the shorthand below should work as well:
 
-```json
-{
-  "name": "local-marketplace",
-  "interface": {
-    "displayName": "Local plugins"
-  },
-  "plugins": [
-    {
-      "name": "remotion-scenes",
-      "source": {
-        "source": "local",
-        "path": "./plugins/remotion-scenes"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Coding"
-    }
-  ]
-}
+```bash
+codex plugin marketplace add panic-z/remotion-scenes
 ```
 
-If `~/.agents/plugins/marketplace.json` already exists, append the `remotion-scenes` entry to its `plugins` array instead of replacing the file.
+Codex stores the repo as a marketplace and makes `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` available in a new session.
 
-Codex detects the plugin from `~/plugins/remotion-scenes/.codex-plugin/plugin.json`. Verify in a new Codex session that `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` appear in the available skills/plugins list.
+### Claude Code
+
+Fastest supported install from inside Claude Code:
+
+```text
+/plugin marketplace add panic-z/remotion-scenes
+/plugin install remotion-scenes@remotion-scenes
+/reload-plugins
+```
+
+This works because the repo now includes a Claude Code marketplace manifest at `.claude-plugin/marketplace.json`.
+
+If you prefer the local-manifest route, use the same checkout and register it with your local Claude Code plugin workflow, pointing Claude Code at:
+
+```text
+~/plugins/remotion-scenes/.claude-plugin/plugin.json
+```
+
+If your Claude Code setup already supports local plugin directories, you do not need a second clone. Verify in a new Claude Code session that `remotion-scenes`, `script-to-prompt`, and `prompt-to-project` are available.
 
 ## Prerequisites
 
@@ -72,7 +77,7 @@ Codex detects the plugin from `~/plugins/remotion-scenes/.codex-plugin/plugin.js
 ## Quick start
 
 1. Put a script in `my-script.md` (or paste it directly).
-2. In Codex:
+2. In Codex or Claude Code:
    > "Use script-to-prompt to turn my-script.md into a scenes prompt."
 
    Review the resulting `scenes-prompt.md`. Edit freely.
@@ -81,6 +86,7 @@ Codex detects the plugin from `~/plugins/remotion-scenes/.codex-plugin/plugin.js
 4. Preview:
    ```bash
    cd my-video
+   npm install
    npx remotion studio
    ```
 
@@ -156,10 +162,10 @@ A: Yes — this plugin intentionally leaves both out. For voiceover, see `remoti
 A: `prompt-to-project` will generate placeholder colored blocks with `// TODO: provide <path>` and print a missing-assets checklist. Put the files under `public/assets/`, preserving any subdirectories after `./assets/`, and re-run the studio.
 
 **Q: Can I use Tailwind?**
-A: Not out of the box. The scaffold uses `--no-tailwind` for config simplicity. Add Tailwind manually per the Remotion docs if needed.
+A: Not by default. This workflow still requests `--no-tailwind`, but current `create-video@latest` templates may still include dormant Tailwind packages. The generated scenes should use plain CSS / inline styles unless you explicitly choose to add Tailwind later.
 
 **Q: I want to use pnpm / yarn / bun.**
-A: The scaffold is invoked via `npx create-video@latest`. After scaffolding, `cd` into the project and use any package manager you prefer.
+A: The scaffold is invoked via `npx create-video@latest`. After scaffolding, `cd` into the project, install dependencies with your preferred package manager (`npm install`, `pnpm install`, etc.), and then continue with studio/render commands.
 
 ## Contributing
 

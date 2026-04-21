@@ -5,7 +5,7 @@
 
 ## Purpose
 
-A Codex plugin that turns a video script into a working Remotion project in two steps:
+A Codex plugin and Claude Code plugin that turns a video script into a working Remotion project in two steps:
 
 1. **script-to-prompt** — transform a script (narrative or storyboard) into a structured "Remotion scenes prompt" in Markdown.
 2. **prompt-to-project** — consume that prompt to scaffold a Remotion project from scratch and implement the animations.
@@ -21,7 +21,7 @@ The two sub-skills are intentionally decoupled so that the Markdown "scenes prom
 
 ## Distribution
 
-- Packaged as a Codex plugin.
+- Packaged for both Codex and Claude Code.
 - Installed by cloning into `~/plugins/remotion-scenes`, then registering the plugin in `~/.agents/plugins/marketplace.json`.
 - Parent skill is **index-only** — it documents the two sub-skills and the typical workflow; it does **not** auto-dispatch.
 
@@ -146,7 +146,7 @@ Transition-out: none
    - Local path → create `public/assets/`, preserve the relative path after `./assets/`, and emit a placeholder colored block with a `TODO` comment referencing the original prompt path if the file is missing.
    - Summarize missing assets at the end.
 7. Post-generation:
-   - Instruct user to run `npx remotion studio` for preview.
+   - Instruct user to install dependencies, then run `npx remotion studio` for preview.
    - Optionally run `npx remotion still --scale=0.25 --frame=30` as a sanity check.
    - Print summary: files generated, missing assets, next commands.
 
@@ -164,7 +164,7 @@ Index-only skill. `SKILL.md` contents:
   1. Have a script.
   2. Invoke `script-to-prompt` → review `scenes-prompt.md`.
   3. Invoke `prompt-to-project` → scaffold + animate.
-  4. `npx remotion studio` to preview.
+  4. Install dependencies, then run `npx remotion studio` to preview.
 - Pointers to README and `examples/`.
 - Explicitly: does **not** auto-dispatch sub-skills.
 
@@ -172,8 +172,8 @@ Index-only skill. `SKILL.md` contents:
 
 1. Intro — one-liner.
 2. Install:
-   - **A (recommended):** `/plugin marketplace add https://github.com/panic-z/remotion-scenes.git` → `/plugin install remotion-scenes`.
-   - **B (manual):** clone into `~/plugins/remotion-scenes` and register it in `~/.agents/plugins/marketplace.json`.
+   - **Codex:** clone into `~/plugins/remotion-scenes` and register it in `~/.agents/plugins/marketplace.json`.
+   - **Claude Code:** `/plugin marketplace add panic-z/remotion-scenes` → `/plugin install remotion-scenes@remotion-scenes` → `/reload-plugins`.
 3. Prerequisites — Node.js ≥ 18, npm or pnpm.
 4. Quick start — 3-step walkthrough with an example script.
 5. Sub-skills reference — trigger, inputs, outputs, parameters.

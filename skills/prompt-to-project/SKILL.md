@@ -71,6 +71,11 @@ npx create-video@latest --yes --blank --no-tailwind <name>
 
 If the user explicitly asks for in-place scaffolding, run in a temp sibling directory and move files after generation. Otherwise prefer a named subdirectory because it is simpler and less error-prone.
 
+Install the generated project's dependencies before any follow-up command:
+```bash
+cd <project-dir> && npm install
+```
+
 If `@remotion/transitions` is needed (any validated scene boundary not `none`), install it:
 ```bash
 cd <project-dir> && npm install @remotion/transitions
@@ -191,12 +196,13 @@ Print:
 4. Next commands:
    ```
    cd <project-dir>
+   npm install
    npx remotion studio
    ```
 
 ## Constraints
 
-- Never enable Tailwind — the scaffold flag `--no-tailwind` is mandatory.
+- Request `--no-tailwind` when scaffolding, but do not assume the current `create-video@latest` template is fully Tailwind-free. Avoid introducing Tailwind-specific code unless the user explicitly wants it.
 - Never add voiceover or subtitle tracks.
 - All frame ranges in the scenes prompt are scene-local; convert correctly when the Main composition uses a single global frame (it does not — each `<Sequence>` resets the frame counter inside the child component).
 - Do not modify files outside the chosen project directory.

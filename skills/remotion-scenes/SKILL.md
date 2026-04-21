@@ -21,7 +21,7 @@ The two skills communicate via the **scenes-prompt format**, which is human-read
 2. Invoke `script-to-prompt` → produces `scenes-prompt.md`.
 3. User reviews and edits `scenes-prompt.md` if needed.
 4. Invoke `prompt-to-project` → scaffolds Remotion project + writes scene components.
-5. `cd <project>` and run `npx remotion studio` to preview.
+5. `cd <project>`, install dependencies, then run `npx remotion studio` to preview.
 
 ## What this skill does NOT do
 
