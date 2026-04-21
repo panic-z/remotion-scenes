@@ -1,5 +1,7 @@
 # remotion-scenes
 
+[简体中文说明](./README.zh-CN.md)
+
 A Claude Code plugin that turns a video script into a working [Remotion](https://remotion.dev) project in two steps.
 
 ```
