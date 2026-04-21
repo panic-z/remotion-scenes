@@ -1108,7 +1108,7 @@ Expected: package added, no errors.
 
 Run:
 ```bash
-cd /tmp/remotion-scenes-dogfood/my-video && npx remotion still HelloWorld --frame=0 --scale=0.25 --output=out/check.png
+cd /tmp/remotion-scenes-dogfood/my-video && npx remotion still MyComp --frame=0 --scale=0.25 --output=out/check.png
 ```
 Expected: PNG produced. (We don't need to render our scenes here — this only verifies the scaffold command itself works on this machine.)
 
